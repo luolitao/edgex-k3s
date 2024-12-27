@@ -1,0 +1,94 @@
+
+{{- if .Values.redis.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "chart.redis" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: redis
+spec:
+  replicas: 1
+  serviceName: {{ template "chart.redis" . }}
+  selector:
+    matchLabels:
+      {{- include "chart.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "chart.labels" . | nindent 8 }}
+        component: redis
+    spec:
+      serviceAccountName: {{ .Values.redis.serviceAccountName }}
+      {{- if .Values.redis.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.redis.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: redis
+        image: {{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}
+        imagePullPolicy: {{ .Values.redis.imagePullPolicy }}
+        {{- if .Values.redis.containerSecurityContext }}
+        securityContext:
+          {{- toYaml .Values.redis.containerSecurityContext | nindent 10 }}
+        {{- end }}
+        command: ["redis-server"]
+        args:
+          - "--bind"
+          - "0.0.0.0"
+          - "--protected-mode"
+          - "no"
+          - "--appendonly"
+          - "yes"
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 1
+          periodSeconds: 10
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/redis
+          subPath: {{ .Values.redis.persistence.subPath }}
+      securityContext:
+        runAsUser: 999
+        fsGroup: 999
+      {{- if .Values.redis.affinity }}
+      affinity:
+        {{- toYaml .Values.redis.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.redis.tolerations }}
+      tolerations:
+        {{- toYaml .Values.redis.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.redis.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.redis.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.redis.automountServiceAccountToken }}
+      automountServiceAccountToken: {{ .Values.redis.automountServiceAccountToken | default false }}
+      {{- end }}
+      terminationGracePeriodSeconds: 120
+      {{- if .Values.redis.initContainers }}
+      initContainers:
+        {{- toYaml .Values.redis.initContainers | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        {{- include "chart.labels" . | nindent 8 }}
+    spec:
+      accessModes: [{{ .Values.redis.persistence.accessMode | quote }}]
+      resources:
+        requests:
+          storage: {{ .Values.redis.persistence.size | quote }}
+      {{- if .Values.redis.persistence.storageClass }}
+      storageClassName: "{{ .Values.redis.persistence.storageClassName }}"
+      {{- end }}
+{{- end }}

@@ -5,8 +5,8 @@ metadata:
   name: core-metadata
 spec:
   ports:
-    - port: 48081
-      targetPort: 48081
+    - port: {{ .Values.coreMetadata.service.port }}
+      targetPort: {{ .Values.coreMetadata.service.port }}
       protocol: TCP
   selector:
     app: core-metadata

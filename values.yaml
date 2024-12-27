@@ -1,19 +1,48 @@
-# Global settings for EdgeX services
-global:
-  imageRegistry: ""
-  imagePullSecrets: []
-  systemType: "default" # Set to 'default' for production, 'docker' for dev setup
-  exportLogs: true
-  namespace: "edgex"
+  
+mqtt:
+  enabled: true
+  host: edgex-vernemq
   
 # Configuration for Redis
 redis:
+  # -- Enable redis
   enabled: true
+  # -- Redis name
+  name: redis
+  extraEnvVars: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podLabels: {}
+  podAnnotations: {}
+  serviceAccountName: ""
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets:
+  #  - name: docker-registry-secret
+  #  - name: internal-registry-secret
+  initContainers: []
+  # Example:
+  #
+  # - name: wait
+  #   image: busybox
+  #   command: [ 'sh', '-c', "sleep 20" ]
+  priorityClassName:
+  ## Redis image
+  image:
+    # -- Redis repository
+    repository: oci.sz9wang.com/dh/redis
+    # -- Redis tag
+    tag: 7.2.4-alpine
   replicaCount: 1
-  password: "your-redis-password" # Set your password for Redis here
+  password: "" # Set your password for Redis here
   persistence:
     enabled: true
-    size: 5Gi # Set Redis persistence volume size
+    existingClaim: ""
+    storageClassName: kadalu.gluster-storage-dc
+    subPath: ""
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    annotations: {}
   resources:
     requests:
       memory: "256Mi"
@@ -21,67 +50,42 @@ redis:
     limits:
       memory: "512Mi"
       cpu: "500m"
-
-# Configuration for Mosquitto (MQTT)
-mqtt:
-  enabled: true
-  replicaCount: 1
-  persistence:
-    enabled: true
-    size: 10Gi # Set Mosquitto persistence volume size
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "256Mi"
-      cpu: "300m"
-  config:
-    persistence:
-      enabled: true
-      retention: 60 # Number of minutes to keep retained messages
-      topic: "edgex/events" # Topic where EdgeX services will publish events
-    listener:
-      port: 1883 # Port for MQTT broker
-      protocol: "mqtt" # MQTT protocol setting
-    authorization:
-      enabled: false # Set true if you need user authentication
-
-device:
-  enabled: true
-  image:
-    repository: "edgexfoundry/device"
-    tag: "3.1.0" # Adjust according to the EdgeX version
-  replicas: 2
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "500m"
-    limits:
-      memory: "1Gi"
-      cpu: "1"
+  ## set Container Security Context to comply with PSP restricted policy if necessary
+  ## each of the conatiner will apply the same security context
+  ## containerSecurityContext:{} is initially an empty yaml that you could edit it on demand, we just filled with a common template for convenience
+  containerSecurityContext:
+    privileged: false
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    runAsNonRoot: true
+    capabilities:
+      drop:
+        - ALL
 
 # Example EdgeX service configuration for core-data
 coreData:
-  enabled: true
+  enabled: false
+  name: edgex-core-data
+  replicas: 1
   image:
-    repository: "edgexfoundry/core-data"
-    tag: "3.0.0"  # Replace with the appropriate version
-  replicas: 2
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "500m"
-    limits:
-      memory: "1Gi"
-      cpu: "1"
+    repository: oci.sz9wang.com/dh/edgexfoundry/core-data
+    tag: 3.1.0
+    pullPolicy: IfNotPresent
+  service:
+    port: 48080
+    adminPort: 48081
+  configMapName: edgex-core-data-config
+  # roleName: edgex-core-data-role
+  # roleBindingName: edgex-core-data-role-binding
+  # serviceAccountName: edgex-core-data-service-account
 
 # Example EdgeX service configuration for core-metadata
 coreMetadata:
   enabled: true
   image:
-    repository: "edgexfoundry/core-metadata"
-    tag: "3.0.0"  # Replace with the appropriate version
+    repository: "oci.sz9wang.com/dh/edgexfoundry/core-metadata"
+    tag: "3.1.0"  # Replace with the appropriate version
   replicas: 2
   resources:
     requests:
@@ -90,12 +94,14 @@ coreMetadata:
     limits:
       memory: "1Gi"
       cpu: "1"
-
+  service:
+    port: 48090
+    adminPort: 48091
 coreCommand:
   enabled: true
   image:
-    repository: "edgexfoundry/core-command"
-    tag: "3.0.0"  # Specify the version of core-command
+    repository: "oci.sz9wang.com/dh/edgexfoundry/core-command"
+    tag: "3.1.0"  # Specify the version of core-command
   replicas: 2
   resources:
     requests:
@@ -104,6 +110,62 @@ coreCommand:
     limits:
       memory: "512Mi"
       cpu: "500m"
-  env:
-    CORE_COMMAND_PORT: "48081"
-    CORE_COMMAND_DB: "redis"  # Change this to the actual backend if necessary
+  service:
+    port: 48070
+    adminPort: 48073
+  security:
+    secretStore: false
+
+coreSupportScheduler:
+  enabled: true
+  image:
+    repository: "oci.sz9wang.com/dh/edgexfoundry/core-support-scheduler"
+    tag: "3.1.0"  # Specify the version of core-support-scheduler
+  replicas: 2
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  service:
+    port: 48085
+    adminPort: 48086
+  security:
+    secretStore: false
+
+ekuiper:
+  enabled: true
+  image:
+    repository: "oci.sz9wang.com/dh/lfedge/ekuiper"
+    tag: 1.7.0
+    pullPolicy: IfNotPresent
+  replicas: 1
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  service:
+    port: 48086
+    adminPort: 48087
+  config:
+    customConfig: |
+      # eKuiper configuration
+      basic:
+        logLevel: debug
+      mqtt:
+        server: tcp://edgex-mqtt:1883
+        clientId: ekuiper-client
+        username: ""
+        password: ""
+        qos: 1
+      sink:
+        defaultType: mqtt
+        connections:
+          mqtt:
+            server: tcp://edgex-mqtt:1883
+            qos: 1

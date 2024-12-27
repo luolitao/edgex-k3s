@@ -4,11 +4,3 @@ description: A Helm chart for EdgeX Foundry with Redis and Mosquitto dependencie
 type: application
 version: 0.1.0
 appVersion: "3.1.0"
-
-dependencies:
-  - name: redis
-    version: "15.0.0"  # Replace with the appropriate version
-    repository: "https://charts.bitnami.com/bitnami"
-  - name: mosquitto
-    version: "10.0.0"  # Replace with the appropriate version
-    repository: "https://charts.eclipse.org/mosquitto"

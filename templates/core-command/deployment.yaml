@@ -24,18 +24,42 @@ spec:
             limits:
               memory: "{{ .Values.coreCommand.resources.limits.memory }}"
               cpu: "{{ .Values.coreCommand.resources.limits.cpu }}"
+          startupProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.coreCommand.service.port }}
+            failureThreshold: 120
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.coreCommand.service.port }}
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.coreCommand.service.port }}
+            initialDelaySeconds: 3
+            periodSeconds: 3
           volumeMounts:
             - name: common-config-volume
               mountPath: /etc/edgex/common_config.yaml
               subPath: common_config.yaml
             - name: core-command-config-volume
-              mountPath: /res/core-command-config.yaml
-              subPath: core-command-config.yaml  # Mount specific file from ConfigMap
+              mountPath: /res/core_command_config.yaml
+              subPath: core_command_config.yaml  # Mount specific file from ConfigMap
           env:
-            - name: CORE_COMMAND_PORT
-              value: "48081"  # Default port for the core-command service
-            - name: CORE_COMMAND_DB
-              value: "redis"  # Example DB backend
+            - name: EDGEX_SECURITY_SECRET_STORE
+              value: "false"
+            - name: EDGEX_CONFIG_PROVIDER
+              value: "none"
+            - name: EDGEX_USE_REGISTRY
+              value: "false"
+            - name: EDGEX_COMMON_CONFIG
+              value: "/etc/edgex/common_config.yaml"
+            - name: EDGEX_CONFIG_FILE
+              value: "core_command_config.yaml"
           ports:
             - containerPort: 48081
       volumes:

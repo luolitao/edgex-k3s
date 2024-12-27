@@ -60,3 +60,14 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/* matchLabels */}}
+{{- define "chart.matchLabels" -}}
+release: {{ .Release.Name }}
+app: "{{ template "chart.name" . }}"
+{{- end -}}
+
+{{/* TODO: fix this hardcoded name */}}
+{{- define "chart.redis" -}}
+  {{- printf "edgex-redis" -}} 
+{{- end -}}

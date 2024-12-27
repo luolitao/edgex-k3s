@@ -4,12 +4,15 @@ kind: ConfigMap
 metadata:
   name: core-command-config
 data:
-  core-command-config.yaml: |
+  core_command_config.yaml: |
     # Core Command Configuration
     # Define any specific configurations for core-command here.
     # Example configuration:
     Service:
       Name: core-command
       Version: "3.1.0"
+      Host: "0.0.0.0"
+      Port: {{ .Values.coreCommand.service.port }}
+      AdminPort: {{ .Values.coreCommand.service.adminPort }}
     
 {{- end }}

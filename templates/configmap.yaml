@@ -5,12 +5,16 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 data:
-  config.yaml: |
+  common_config.yaml: |
     all-services:
-      Logging:
-        Level: INFO
-        EnableFileLogging: true
-
+      Writable:
+        LogLevel: INFO
+        InsecureSecrets:
+          DB:
+            SecretName: "redisdb"
+            SecretData:
+              username: ""
+              password: ""
       Service:
         HealthCheckInterval: "10s"
         Host: "localhost"
@@ -33,9 +37,9 @@ data:
         Timeout: "5s"
         Type: "redisdb"
       
-      MessageBus:
+      MessageBus: # TODO: support mqtt, nats or redis via values.yaml
         Protocol: "tcp"
-        Host: "edgex-mqtt" # TBD sync with mqtt deployment name
+        Host: "{{ .Values.mqtt.host }}" # TBD sync with mqtt deployment name
         Port: 1883
         Type: "mqtt"
         AuthMode: "none"  # required for redis MessageBus (secure or insecure).

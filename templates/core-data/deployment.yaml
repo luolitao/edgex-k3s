@@ -1,68 +1,70 @@
+{{- if .Values.coreData.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "chart.fullname" . }}
+  name: {{ .Values.coreData.name }}
   labels:
-    {{- include "chart.labels" . | nindent 4 }}
+    app: {{ .Values.coreData.name }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.coreData.replicas }}
   selector:
     matchLabels:
-      {{- include "chart.selectorLabels" . | nindent 6 }}
+      app: {{ .Values.coreData.name }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "chart.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        app: {{ .Values.coreData.name }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "chart.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: coredata
+          image: {{ .Values.coreData.image.repository }}:{{ .Values.coreData.image.tag }}
+          imagePullPolicy: {{ .Values.coreData.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
+            - containerPort: {{ .Values.coreData.service.port }}
+              name: http
+            - containerPort: {{ .Values.coreData.service.adminPort }}
+              name: http-admin
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
+            - name: common-config-volume
+              mountPath: /etc/edgex/common_config.yaml
+              subPath: common_config.yaml
+            - name: core-data-config-volume
+              mountPath: /res/core_data_config.yaml
+              subPath: core_data_config.yaml  # Mount specific file from ConfigMap
+          env:
+            - name: EDGEX_SECURITY_SECRET_STORE
+              value: "false"
+            - name: EDGEX_CONFIG_PROVIDER
+              value: "none"
+            - name: EDGEX_USE_REGISTRY
+              value: "false"
+            - name: EDGEX_COMMON_CONFIG
+              value: "/etc/edgex/common_config.yaml"
+            - name: EDGEX_CONFIG_FILE
+              value: "core_data_config.yaml"
+          startupProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.coreData.service.port }}
+            failureThreshold: 120
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.coreData.service.port }}
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.coreData.service.port }}
+            initialDelaySeconds: 3
+            periodSeconds: 3
       volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        - name: common-config-volume
+          configMap:
+            name: common-config  # Reference to the common-config ConfigMap
+        - name: core-data-config-volume
+          configMap:
+            name: edgex-core-data-config  # Reference to the core-data-specific ConfigMap            
+{{- end }}

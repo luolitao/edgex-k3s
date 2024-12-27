@@ -1,15 +1,20 @@
+{{- if .Values.coreData.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "chart.fullname" . }}
+  name: {{ .Values.coreData.name }}
   labels:
-    {{- include "chart.labels" . | nindent 4 }}
+    app: {{ .Values.coreData.name }}
 spec:
-  type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - port: {{ .Values.coreData.service.port }}
+      targetPort: {{ .Values.coreData.service.port }}
       protocol: TCP
       name: http
+    - port: {{ .Values.coreData.service.adminPort }}
+      targetPort: {{ .Values.coreData.service.adminPort }}
+      protocol: TCP
+      name: http-admin
   selector:
-    {{- include "chart.selectorLabels" . | nindent 4 }}
+    app: {{ .Values.coreData.name }}
+{{- end }}
