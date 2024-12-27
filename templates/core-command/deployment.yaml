@@ -1,0 +1,48 @@
+{{- if .Values.coreCommand.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-command
+spec:
+  replicas: {{ .Values.coreCommand.replicas }}
+  selector:
+    matchLabels:
+      app: core-command
+  template:
+    metadata:
+      labels:
+        app: core-command
+    spec:
+      serviceAccountName: core-command-service-account  # Reference the ServiceAccount
+      containers:
+        - name: core-command
+          image: "{{ .Values.coreCommand.image.repository }}:{{ .Values.coreCommand.image.tag }}"
+          resources:
+            requests:
+              memory: "{{ .Values.coreCommand.resources.requests.memory }}"
+              cpu: "{{ .Values.coreCommand.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.coreCommand.resources.limits.memory }}"
+              cpu: "{{ .Values.coreCommand.resources.limits.cpu }}"
+          volumeMounts:
+            - name: common-config-volume
+              mountPath: /etc/edgex/common_config.yaml
+              subPath: common_config.yaml
+            - name: core-command-config-volume
+              mountPath: /res/core-command-config.yaml
+              subPath: core-command-config.yaml  # Mount specific file from ConfigMap
+          env:
+            - name: CORE_COMMAND_PORT
+              value: "48081"  # Default port for the core-command service
+            - name: CORE_COMMAND_DB
+              value: "redis"  # Example DB backend
+          ports:
+            - containerPort: 48081
+      volumes:
+        - name: common-config-volume
+          configMap:
+            name: common-config  # Reference to the common-config ConfigMap
+        - name: core-command-config-volume
+          configMap:
+            name: core-command-config  # Reference to the core-command-specific ConfigMap
+{{- end }}

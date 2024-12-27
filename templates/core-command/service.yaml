@@ -1,0 +1,13 @@
+{{- if .Values.coreCommand.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-command
+spec:
+  ports:
+    - port: 48081
+      targetPort: 48081
+      protocol: TCP
+  selector:
+    app: core-command
+{{- end }}

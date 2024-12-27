@@ -1,0 +1,48 @@
+{{- if .Values.coreMetadata.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-metadata
+spec:
+  replicas: {{ .Values.coreMetadata.replicas }}
+  selector:
+    matchLabels:
+      app: core-metadata
+  template:
+    metadata:
+      labels:
+        app: core-metadata
+    spec:
+      serviceAccountName: core-metadata-service-account  # Reference the ServiceAccount
+      containers:
+        - name: core-metadata
+          image: "{{ .Values.coreMetadata.image.repository }}:{{ .Values.coreMetadata.image.tag }}"
+          resources:
+            requests:
+              memory: "{{ .Values.coreMetadata.resources.requests.memory }}"
+              cpu: "{{ .Values.coreMetadata.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.coreMetadata.resources.limits.memory }}"
+              cpu: "{{ .Values.coreMetadata.resources.limits.cpu }}"
+          volumeMounts:
+            - name: common-config-volume
+              mountPath: /etc/edgex/common_config.yaml
+              subPath: common_config.yaml
+            - name: core-metadata-config-volume
+              mountPath: /res/core-metadata-config.yaml
+              subPath: core-metadata-config.yaml  # Mount specific file from ConfigMap
+          env:
+            - name: CORE_METADATA_PORT
+              value: "48081"  # Default port for the core-metadata service
+            - name: CORE_METADATA_DB
+              value: "redis"  # Example DB backend
+          ports:
+            - containerPort: 48081
+      volumes:
+        - name: common-config-volume
+          configMap:
+            name: common-config  # Reference to the common-config ConfigMap
+        - name: core-metadata-config-volume
+          configMap:
+            name: core-metadata-config  # Reference to the core-metadata-specific ConfigMap
+{{- end }}

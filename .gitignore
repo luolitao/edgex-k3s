@@ -1,0 +1,16 @@
+.project
+.DS_Store
+.idea
+*.iml
+*.tmp
+*~
+.#*
+*.swp
+*.swo
+*.swn
+*.swm
+*.pyc
+.vscode/
+.factorypath
+.metadata
+tmp/

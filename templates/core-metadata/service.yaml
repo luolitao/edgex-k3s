@@ -1,0 +1,13 @@
+{{- if .Values.coreMetadata.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-metadata
+spec:
+  ports:
+    - port: 48081
+      targetPort: 48081
+      protocol: TCP
+  selector:
+    app: core-metadata
+{{- end }}

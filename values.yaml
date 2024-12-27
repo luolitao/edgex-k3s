@@ -1,0 +1,109 @@
+# Global settings for EdgeX services
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  systemType: "default" # Set to 'default' for production, 'docker' for dev setup
+  exportLogs: true
+  namespace: "edgex"
+  
+# Configuration for Redis
+redis:
+  enabled: true
+  replicaCount: 1
+  password: "your-redis-password" # Set your password for Redis here
+  persistence:
+    enabled: true
+    size: 5Gi # Set Redis persistence volume size
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# Configuration for Mosquitto (MQTT)
+mqtt:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 10Gi # Set Mosquitto persistence volume size
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "300m"
+  config:
+    persistence:
+      enabled: true
+      retention: 60 # Number of minutes to keep retained messages
+      topic: "edgex/events" # Topic where EdgeX services will publish events
+    listener:
+      port: 1883 # Port for MQTT broker
+      protocol: "mqtt" # MQTT protocol setting
+    authorization:
+      enabled: false # Set true if you need user authentication
+
+device:
+  enabled: true
+  image:
+    repository: "edgexfoundry/device"
+    tag: "3.1.0" # Adjust according to the EdgeX version
+  replicas: 2
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
+
+# Example EdgeX service configuration for core-data
+coreData:
+  enabled: true
+  image:
+    repository: "edgexfoundry/core-data"
+    tag: "3.0.0"  # Replace with the appropriate version
+  replicas: 2
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
+
+# Example EdgeX service configuration for core-metadata
+coreMetadata:
+  enabled: true
+  image:
+    repository: "edgexfoundry/core-metadata"
+    tag: "3.0.0"  # Replace with the appropriate version
+  replicas: 2
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
+
+coreCommand:
+  enabled: true
+  image:
+    repository: "edgexfoundry/core-command"
+    tag: "3.0.0"  # Specify the version of core-command
+  replicas: 2
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  env:
+    CORE_COMMAND_PORT: "48081"
+    CORE_COMMAND_DB: "redis"  # Change this to the actual backend if necessary
