@@ -1,0 +1,15 @@
+
+{{- if .Values.supportNotification.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: support-notification
+spec:
+  type: {{ .Values.supportNotification.service.type }}
+  ports:
+  - port: {{ .Values.supportNotification.service.port }}
+    targetPort: {{ .Values.supportNotification.service.port }}
+  selector:
+    app: support-notification
+  type: {{ .Values.supportNotification.service.type | default "ClusterIP" }}
+{{- end }}

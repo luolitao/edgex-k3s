@@ -1,0 +1,40 @@
+{{- if .Values.ekuiper.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ekuiper
+spec:
+  replicas: {{ .Values.ekuiper.replicas }}
+  selector:
+    matchLabels:
+      app: ekuiper
+  template:
+    metadata:
+      labels:
+        app: ekuiper
+    spec:
+      serviceAccountName: ekuiper-service-account  # Reference the ServiceAccount
+      containers:
+        - name: ekuiper
+          image: "{{ .Values.ekuiper.image.repository }}:{{ .Values.ekuiper.image.tag }}"
+          resources:
+            requests:
+              memory: "{{ .Values.ekuiper.resources.requests.memory }}"
+              cpu: "{{ .Values.ekuiper.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.ekuiper.resources.limits.memory }}"
+              cpu: "{{ .Values.ekuiper.resources.limits.cpu }}"
+          volumeMounts:
+            - name: ekuiper-config-volume
+              mountPath: /res/ekuiper_config.yaml
+              subPath: ekuiper_config.yaml  # Mount specific file from ConfigMap
+          env:
+            - name: KUIPER__BASIC__CONSOLELOG
+              value: "true"
+          ports:
+            - containerPort: {{ .Values.ekuiper.service.port }}
+      volumes:
+        - name: ekuiper-config-volume
+          configMap:
+            name: ekuiper-config  # Reference to the ekuiper-specific ConfigMap
+{{- end }}

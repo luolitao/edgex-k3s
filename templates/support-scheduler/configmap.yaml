@@ -1,0 +1,19 @@
+{{- if .Values.supportScheduler.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "support-scheduler-config"
+data:
+  support_scheduler_config.yaml: |
+    # Support Scheduler Configuration
+    # Define any specific configurations for support-scheduler here.
+    # Example configuration:
+    ScheduleIntervalTime: 500
+    Service:
+      Name: support-scheduler
+      Version: "3.1.0"
+      Host: "0.0.0.0"
+      Port: {{ .Values.supportScheduler.service.port }}
+      AdminPort: {{ .Values.supportScheduler.service.adminPort }}
+
+{{- end }}

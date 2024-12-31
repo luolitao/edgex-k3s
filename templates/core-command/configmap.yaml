@@ -14,5 +14,10 @@ data:
       Host: "0.0.0.0"
       Port: {{ .Values.coreCommand.service.port }}
       AdminPort: {{ .Values.coreCommand.service.adminPort }}
+    Clients:
+      core-metadata:
+        Host: "core-metadata"
+        Port: {{ .Values.coreMetadata.service.port }}
+        Protocol: "http"
     
 {{- end }}

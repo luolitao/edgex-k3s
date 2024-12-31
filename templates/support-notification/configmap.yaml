@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: support-notification-config
+  labels:
+    app: support-notification
+data:
+  support_notification_config.yaml: |
+    # Support Notification Configuration
+    Service:
+      Name: support-notification
+      Host: "0.0.0.0"
+      Port: 48088
+      AdminPort: 48089
+    Retention:
+      Enabled: true
+      Interval: "30m"
+      MaxCap: 5000
+      MinCap: 4000

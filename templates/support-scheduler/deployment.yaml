@@ -1,0 +1,68 @@
+{{- if .Values.supportScheduler.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: support-scheduler
+spec:
+  replicas: {{ .Values.supportScheduler.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: support-scheduler
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: support-scheduler
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: support-scheduler
+          image: "{{ .Values.supportScheduler.image.repository }}:{{ .Values.supportScheduler.image.tag }}"
+          imagePullPolicy: {{ .Values.supportScheduler.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.supportScheduler.service.port }}
+          volumeMounts:
+            - name: common-config-volume
+              mountPath: /etc/edgex/common_config.yaml
+              subPath: common_config.yaml
+            - name: support-scheduler-config-volume
+              mountPath: /res/support_scheduler_config.yaml
+              subPath: support_scheduler_config.yaml  # Mount specific file from ConfigMap
+          env:
+            - name: EDGEX_SECURITY_SECRET_STORE
+              value: "false"
+            - name: EDGEX_CONFIG_PROVIDER
+              value: "none"
+            - name: EDGEX_USE_REGISTRY
+              value: "false"
+            - name: EDGEX_COMMON_CONFIG
+              value: "/etc/edgex/common_config.yaml"
+            - name: EDGEX_CONFIG_FILE
+              value: "support_scheduler_config.yaml"
+          startupProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.supportScheduler.service.port }}
+            failureThreshold: 120
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.supportScheduler.service.port }}
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /api/v3/ping
+              port: {{ .Values.supportScheduler.service.port }}
+            initialDelaySeconds: 3
+            periodSeconds: 3
+      volumes:
+        - name: common-config-volume
+          configMap:
+            name: common-config
+        - name: support-scheduler-config-volume
+          configMap:
+            name: support-scheduler-config
+{{- end }}

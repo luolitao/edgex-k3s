@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ekuiper-config
+  labels:
+    argocd.argoproj.io/instance: edgex
+data:
+  ekuiper_config.yaml: |
+    # eKuiper configuration
+    basic:
+      logLevel: debug
+    mqtt:
+      clientId: ekuiper-client
+      password: ""
+      qos: 1
+      server: tcp://edgex-vernemq:1883
+      username: ""
+    sink:
+      connections:
+        mqtt:
+          qos: 1
+          server: tcp://edgex-vernemq:1883
+      defaultType: mqtt

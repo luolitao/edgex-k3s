@@ -1,0 +1,14 @@
+{{- if .Values.ekuiper.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: ekuiper
+spec:
+  ports:
+    - port: {{ .Values.ekuiper.service.port }}
+      targetPort: {{ .Values.ekuiper.service.port }}
+      protocol: TCP
+  selector:
+    app: ekuiper
+  type: {{ .Values.ekuiper.service.type | default "ClusterIP" }}
+{{- end }}

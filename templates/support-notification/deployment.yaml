@@ -1,0 +1,55 @@
+
+{{- if .Values.supportNotification.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: support-notification
+spec:
+  replicas: {{ .Values.supportNotification.replicaCount }}
+  selector:
+    matchLabels:
+      app: support-notification
+  template:
+    metadata: 
+      labels:
+        app: support-notification
+    spec:
+      serviceAccountName: support-notification-service-account
+      containers:
+      - name: support-notification
+        image: "{{ .Values.supportNotification.image.repository }}:{{ .Values.supportNotification.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.supportNotification.service.port }}
+        volumeMounts:
+          - name: common-config-volume
+            mountPath: /etc/edgex/common_config.yaml
+            subPath: common_config.yaml
+          - name: support-notification-config-volume
+            mountPath: /res/support_notification_config.yaml
+            subPath: support_notification_config.yaml  # Mount specific file from ConfigMap
+        env:
+        - name: EDGEX_SECURITY_SECRET_STORE
+          value: "false"
+        - name: EDGEX_CONFIG_PROVIDER
+          value: "none"
+        - name: EDGEX_USE_REGISTRY
+          value: "false"
+        - name: EDGEX_COMMON_CONFIG
+          value: "/etc/edgex/common_config.yaml"
+        - name: EDGEX_CONFIG_FILE
+          value: "support_notification_config.yaml"
+        resources:
+          requests:
+            memory: "{{ .Values.supportNotification.resources.requests.memory }}"
+            cpu: "{{ .Values.supportNotification.resources.requests.cpu }}"
+          limits:
+            memory: "{{ .Values.supportNotification.resources.limits.memory }}"
+            cpu: "{{ .Values.supportNotification.resources.limits.cpu }}"
+      volumes:
+        - name: common-config-volume
+          configMap:
+            name: common-config
+        - name: support-notification-config-volume
+          configMap:
+            name: support-notification-config
+{{- end }}

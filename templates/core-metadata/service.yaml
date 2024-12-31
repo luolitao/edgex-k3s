@@ -10,4 +10,5 @@ spec:
       protocol: TCP
   selector:
     app: core-metadata
+  type: {{ .Values.coreMetadata.service.type | default "ClusterIP" }}
 {{- end }}

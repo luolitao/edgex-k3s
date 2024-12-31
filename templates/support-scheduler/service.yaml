@@ -1,0 +1,13 @@
+{{- if .Values.supportScheduler.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: support-scheduler
+spec:
+  ports:
+    - port: {{ .Values.supportScheduler.service.port }}
+      targetPort: {{ .Values.supportScheduler.service.port }}
+      protocol: TCP
+  selector: 
+    app: support-scheduler
+{{- end }}

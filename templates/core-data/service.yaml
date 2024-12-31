@@ -15,6 +15,7 @@ spec:
       targetPort: {{ .Values.coreData.service.adminPort }}
       protocol: TCP
       name: http-admin
+  type: {{ .Values.coreData.service.type | default "ClusterIP" }}
   selector:
     app: {{ .Values.coreData.name }}
 {{- end }}

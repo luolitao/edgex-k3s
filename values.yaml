@@ -66,7 +66,7 @@ redis:
 # Example EdgeX service configuration for core-data
 coreData:
   enabled: false
-  name: edgex-core-data
+  name: core-data
   replicas: 1
   image:
     repository: oci.sz9wang.com/dh/edgexfoundry/core-data
@@ -102,6 +102,7 @@ coreCommand:
   image:
     repository: "oci.sz9wang.com/dh/edgexfoundry/core-command"
     tag: "3.1.0"  # Specify the version of core-command
+    pullPolicy: IfNotPresent
   replicas: 2
   resources:
     requests:
@@ -116,11 +117,12 @@ coreCommand:
   security:
     secretStore: false
 
-coreSupportScheduler:
+supportScheduler:
   enabled: true
   image:
-    repository: "oci.sz9wang.com/dh/edgexfoundry/core-support-scheduler"
-    tag: "3.1.0"  # Specify the version of core-support-scheduler
+    repository: "oci.sz9wang.com/dh/edgexfoundry/support-scheduler"
+    tag: "3.1.0"  # Specify the version of support-scheduler
+    pullPolicy: IfNotPresent
   replicas: 2
   resources:
     requests:
@@ -152,20 +154,21 @@ ekuiper:
   service:
     port: 48086
     adminPort: 48087
-  config:
-    customConfig: |
-      # eKuiper configuration
-      basic:
-        logLevel: debug
-      mqtt:
-        server: tcp://edgex-mqtt:1883
-        clientId: ekuiper-client
-        username: ""
-        password: ""
-        qos: 1
-      sink:
-        defaultType: mqtt
-        connections:
-          mqtt:
-            server: tcp://edgex-mqtt:1883
-            qos: 1
+
+supportNotification:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: oci.sz9wang.com/dh/edgexfoundry/support-notifications
+    tag: 3.1.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 48088
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "250m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
