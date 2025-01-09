@@ -97,6 +97,7 @@ coreMetadata:
   service:
     port: 48090
     adminPort: 48091
+
 coreCommand:
   enabled: true
   image:
@@ -116,6 +117,9 @@ coreCommand:
     adminPort: 48073
   security:
     secretStore: false
+  autoscaling:
+    cpuAverageUtilization: 50
+    memoryAverageUtilization: 50
 
 supportScheduler:
   enabled: true
@@ -172,3 +176,51 @@ supportNotification:
     limits:
       memory: "128Mi"
       cpu: "500m"
+      
+zhonghong:
+  enabled: true
+  image:
+    repository: oci.sz9wang.com/tuxscc/device-zhonghong
+    tag: latest # To be fixed
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 48089
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "250m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
+  devices:
+    deviceList:
+      - name: Office-VRF-Controller
+        profileName: VRF-Controller
+        description: >-
+          This is the device that manages the ACs on the third floor, west corner
+        labels:
+          - Air conditioner
+          - modbus TCP
+        protocols:
+          simulator-http:
+            Address: "http://192.168.1.140"
+            Port: "8001"
+            ACAddr:
+              - "01-05"
+        autoEvents:
+          - interval: 180s
+            onChange: false
+            sourceName: ACStatus
+          - interval: 5s
+            onChange: false
+            sourceName: ACPowerStatus
+          - interval: 5s
+            onChange: false
+            sourceName: ACTemp
+          - interval: 5s
+            onChange: false
+            sourceName: ACMode
+          - interval: 5s
+            onChange: false 
+            sourceName: ACWindDirection

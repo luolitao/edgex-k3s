@@ -1,0 +1,15 @@
+{{- if .Values.zhonghong.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: device-zhonghong
+  labels:
+    app: {{ .Release.Name }}-device-zhonghong
+spec:
+  type: {{ .Values.zhonghong.service.type | default "ClusterIP" }}
+  ports:
+    - port: {{ .Values.zhonghong.service.port }}
+      targetPort: {{ .Values.zhonghong.service.port }}
+  selector:
+    app: device-zhonghong
+{{- end }}

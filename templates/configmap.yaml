@@ -52,3 +52,31 @@ data:
           AutoReconnect: "true"
           ConnectTimeout: "5" # Seconds
           SkipCertVerify: "true"
+    device-services:
+      MaxEventSize: 0 # value 0 represents unlimited  maximum event size that can be sent to message bus or core-data
+      Writable:
+        Reading:
+          ReadingUnits: true
+        Telemetry:
+          Metrics:
+            EventsSent: false
+            ReadingsSent: false
+      Clients:
+        core-metadata:
+          Protocol: "http"
+          Host: "core-metadata"
+          Port: {{ .Values.coreMetadata.service.port }}
+      Device:
+        DataTransform: true
+        MaxCmdOps: 128
+        MaxCmdValueLen: 256
+        ProfilesDir: "/res/profiles"
+        DevicesDir: "/res/devices"
+        # ProvisionWatchersDir is omitted here since most Device Services don't use it.
+        # Those that do will have it in their private config
+        EnableAsyncReadings: true
+        AsyncBufferSize: 16
+        Labels: []
+        Discovery:
+          Enabled: false
+          Interval: "30s"

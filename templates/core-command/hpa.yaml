@@ -2,12 +2,12 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: core-command
+  name: {{ .Values.coreCommand.name | default "core-command" }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: core-command
+    name: {{ .Values.coreCommand.name | default "core-command" }}
   minReplicas: 1
   maxReplicas: 3
   metrics:
@@ -16,5 +16,11 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 50  # Scale based on 50% CPU utilization
+          averageUtilization: {{ .Values.coreCommand.autoscaling.cpuAverageUtilization | default 50 }}  # Scale based on 50% CPU utilization
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.coreCommand.autoscaling.memoryAverageUtilization | default 50 }}  # Scale based on 50% memory utilization
 {{- end }}

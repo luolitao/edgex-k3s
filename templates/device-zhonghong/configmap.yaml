@@ -1,0 +1,17 @@
+{{- if .Values.zhonghong.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: device-zhonghong-config
+#   labels:
+#     app: {{ .Release.Name }}-device-zhonghong
+data:
+  device_zhonghong_config.yaml: |
+    # Device Zhonghong Configuration
+    # Define any specific configurations for device-zhonghong here.
+    Service:
+      Name: device-zhonghong
+      Version: "1.0.0"
+      Host: "0.0.0.0"
+      Port: {{ .Values.zhonghong.service.port }}
+{{- end }}

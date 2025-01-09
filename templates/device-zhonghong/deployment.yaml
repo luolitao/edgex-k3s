@@ -1,0 +1,60 @@
+{{- if .Values.zhonghong.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: device-zhonghong
+#   labels:
+#     app: {{ .Release.Name }}-device-zhonghong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: device-zhonghong
+  template:
+    metadata:
+      labels:
+        app: device-zhonghong
+    spec:
+      containers:
+        - name: device-zhonghong
+          image: {{ .Values.zhonghong.image.repository }}:{{ .Values.zhonghong.image.tag }}
+          imagePullPolicy: {{ .Values.zhonghong.image.pullPolicy }}
+          env:
+            - name: EDGEX_SECURITY_SECRET_STORE
+              value: "false"
+            - name: EDGEX_CONFIG_PROVIDER
+              value: "none"
+            - name: EDGEX_USE_REGISTRY  
+              value: "false"
+            - name: EDGEX_COMMON_CONFIG
+              value: "/etc/edgex/common_config.yaml"
+            - name: EDGEX_CONFIG_FILE
+              value: "device_zhonghong_config.yaml"
+          ports:
+            - name: http
+              containerPort: {{ .Values.zhonghong.service.port }}
+          volumeMounts:
+            - name: common-config-volume
+              mountPath: /etc/edgex/common_config.yaml
+              subPath: common_config.yaml
+            - name: zhonghong-config-volume
+              mountPath: /res/device_zhonghong_config.yaml
+              subPath: device_zhonghong_config.yaml  # Mount specific file from ConfigMap
+            - name: zhonghong-profiles-volume
+              mountPath: /res/profiles
+            - name: zhonghong-devices-volume
+              mountPath: /res/devices
+      volumes:
+        - name: common-config-volume
+          configMap:
+            name: common-config  # Reference to the common-config ConfigMap
+        - name: zhonghong-config-volume
+          configMap:
+            name: device-zhonghong-config
+        - name: zhonghong-profiles-volume
+          configMap:
+            name: device-zhonghong-profiles
+        - name: zhonghong-devices-volume
+          configMap:
+            name: device-zhonghong-devices
+{{- end }}

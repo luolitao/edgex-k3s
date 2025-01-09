@@ -1,0 +1,11 @@
+{{- if .Values.zhonghong.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: device-zhonghong-devices
+  labels:
+    app: {{ .Release.Name }}-device-zhonghong
+data:
+  devices.yaml: |
+    deviceList: {{ toYaml .Values.zhonghong.devices.deviceList | nindent 4 }}
+{{- end }}

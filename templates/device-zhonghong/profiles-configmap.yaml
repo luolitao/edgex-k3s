@@ -1,0 +1,133 @@
+{{- if .Values.zhonghong.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: device-zhonghong-profiles
+  labels:
+    app: {{ .Release.Name }}-device-zhonghong
+data:
+  zhonghong.b19.yaml: |
+    name: "VRF-Controller"
+    manufacturer: "Zhonghong"
+    model: "B19"
+    labels:
+    - "485"
+    - "VRF"
+    - "Controller"
+    - "Zhonghong"
+    - "AC"
+    description: "Zhonghong VRF Controller"
+
+    deviceResources:
+    -
+        name: "ACOn"
+        isHidden: false
+        description: "Returns AC on status"
+        properties:
+            valueType: "Bool"
+            readWrite: "RW"
+            defaultValue: false
+
+    -
+        name: "ACOff"
+        isHidden: false
+        description: "Returns AC off status"
+        properties:
+            valueType: "Bool"
+            readWrite: "RW"
+            defaultValue: false
+
+    -
+        name: "Acaddr"
+        isHidden: false
+        description: "ReturnsAcaddr"
+        properties:
+            valueType: "String"
+            readWrite: "RW"
+            defaultValue: "00-00"
+
+    -
+        name: "ACStatus"
+        isHidden: false
+        description: "Returns AC status"
+        properties:
+            valueType: "Object"
+            readWrite: "R"
+            defaultValue: "{}"
+
+    -
+        name: "ACPowerStatus"
+        isHidden: false
+        description: "Returns AC power status"
+        properties:
+            valueType: "Bool"
+            readWrite: "R"
+            defaultValue: false
+
+    -
+        name: "ACTemp"
+        isHidden: false
+        description: "Returns AC temperature"
+        properties:
+            valueType: "Int16"
+            readWrite: "RW"
+            defaultValue: 0
+
+    -
+        name: "ACMode"
+        isHidden: false
+        description: "Returns AC mode"
+        properties:
+            valueType: "Int16"
+            readWrite: "RW"
+            defaultValue: "00"
+    
+    -
+        name: "ACWindDirection"
+        isHidden: false
+        description: "Returns AC wind direction"
+        properties:
+            valueType: "Int16"
+            readWrite: "RW"
+            defaultValue: "00"
+
+    deviceCommands:
+    -
+        name: "ACOn"
+        readWrite: "W"
+        isHidden: false
+        resourceOperations:
+            - { deviceResource: "ACOn", defaultValue: false }
+            - { deviceResource: "Acaddr", defaultValue:"00-00" }
+    -
+        name: "ACOff"
+        readWrite: "W"
+        isHidden: false
+        resourceOperations:
+            - { deviceResource: "ACOff", defaultValue: false }
+            - { deviceResource: "Acaddr", defaultValue:"00-00" }
+    - 
+        name: "ACTemperature"
+        readWrite: "W"
+        isHidden: false
+        resourceOperations:
+            - { deviceResource: "ACTemp", defaultValue: 0 }
+            - { deviceResource: "Acaddr", defaultValue:"00-00" }
+
+    -
+        name: "setACMode"
+        readWrite: "W"
+        isHidden: false
+        resourceOperations:
+            - { deviceResource: "ACMode", defaultValue: "00" }
+            - { deviceResource: "Acaddr", defaultValue:"00-00" }
+
+    -
+        name: "setACWindDirection"
+        readWrite: "W"
+        isHidden: false
+        resourceOperations:
+            - { deviceResource: "ACWindDirection", defaultValue: "00" }
+            - { deviceResource: "Acaddr", defaultValue:"00-00" }
+
+{{- end }}

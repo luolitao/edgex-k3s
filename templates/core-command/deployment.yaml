@@ -1,21 +1,22 @@
+
 {{- if .Values.coreCommand.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: core-command
+  name: {{ .Values.coreCommand.name | default "core-command" }}
 spec:
   replicas: {{ .Values.coreCommand.replicas }}
   selector:
     matchLabels:
-      app: core-command
+      app: {{ .Values.coreCommand.name | default "core-command" }}
   template:
     metadata:
       labels:
-        app: core-command
+        app: {{ .Values.coreCommand.name | default "core-command" }}
     spec:
-      serviceAccountName: core-command-service-account  # Reference the ServiceAccount
+      serviceAccountName: {{ .Values.coreCommand.name | default "core-command" }}-service-account  # Corrected typo
       containers:
-        - name: core-command
+        - name: {{ .Values.coreCommand.name | default "core-command" }}
           image: "{{ .Values.coreCommand.image.repository }}:{{ .Values.coreCommand.image.tag }}"
           resources:
             requests:
