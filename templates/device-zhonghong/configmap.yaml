@@ -14,4 +14,6 @@ data:
       Version: "1.0.0"
       Host: "0.0.0.0"
       Port: {{ .Values.zhonghong.service.port }}
+    Writable:
+      LogLevel: {{ .Values.zhonghong.logLevel | default "INFO" }}
 {{- end }}
