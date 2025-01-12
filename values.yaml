@@ -30,15 +30,15 @@ redis:
   ## Redis image
   image:
     # -- Redis repository
-    repository: oci.sz9wang.com/dh/redis
+    repository: redis
     # -- Redis tag
-    tag: 7.2.4-alpine
+    tag: 7.2.7-alpine
   replicaCount: 1
   password: "" # Set your password for Redis here
   persistence:
     enabled: true
     existingClaim: ""
-    storageClassName: kadalu.gluster-storage-dc
+    storageClassName: ""
     subPath: ""
     accessMode: ReadWriteOnce
     size: 1Gi
@@ -69,7 +69,7 @@ coreData:
   name: core-data
   replicas: 1
   image:
-    repository: oci.sz9wang.com/dh/edgexfoundry/core-data
+    repository: edgexfoundry/core-data
     tag: 3.1.0
     pullPolicy: IfNotPresent
   service:
@@ -84,7 +84,7 @@ coreData:
 coreMetadata:
   enabled: true
   image:
-    repository: "oci.sz9wang.com/dh/edgexfoundry/core-metadata"
+    repository: "edgexfoundry/core-metadata"
     tag: "3.1.0"  # Replace with the appropriate version
   replicas: 2
   resources:
@@ -101,7 +101,7 @@ coreMetadata:
 coreCommand:
   enabled: true
   image:
-    repository: "oci.sz9wang.com/dh/edgexfoundry/core-command"
+    repository: "edgexfoundry/core-command"
     tag: "3.1.0"  # Specify the version of core-command
     pullPolicy: IfNotPresent
   replicas: 2
@@ -124,7 +124,7 @@ coreCommand:
 supportScheduler:
   enabled: true
   image:
-    repository: "oci.sz9wang.com/dh/edgexfoundry/support-scheduler"
+    repository: "edgexfoundry/support-scheduler"
     tag: "3.1.0"  # Specify the version of support-scheduler
     pullPolicy: IfNotPresent
   replicas: 2
@@ -144,7 +144,7 @@ supportScheduler:
 ekuiper:
   enabled: true
   image:
-    repository: "oci.sz9wang.com/dh/lfedge/ekuiper"
+    repository: "lfedge/ekuiper"
     tag: 1.7.0
     pullPolicy: IfNotPresent
   replicas: 1
@@ -163,7 +163,7 @@ supportNotification:
   enabled: true
   replicaCount: 1
   image:
-    repository: oci.sz9wang.com/dh/edgexfoundry/support-notifications
+    repository: edgexfoundry/support-notifications
     tag: 3.1.0
     pullPolicy: IfNotPresent
   service:

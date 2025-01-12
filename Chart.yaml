@@ -1,6 +1,6 @@
 apiVersion: v2
 name: edgex-k3s
-description: A Helm chart for EdgeX Foundry with Redis and Mosquitto dependencies, specifically for K3s
+description: A Helm chart for EdgeX Foundry with Redis specifically for K3s
 type: application
 version: 0.1.0
 appVersion: "3.1.0"
